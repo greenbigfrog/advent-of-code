@@ -1,6 +1,6 @@
 require "benchmark"
 
-INPUT = File.read_lines("input.txt").map { |x| x.to_i32 }
+INPUT     = File.read_lines("input.txt").map { |x| x.to_i32 }
 OLD_INPUT = File.read_lines("input.txt")
 
 def find_frequency

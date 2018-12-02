@@ -4,7 +4,7 @@ input = File.read_lines("input.txt")
 input = input.map { |x| x.to_i32 }
 
 a = 0
-old_frequencies = Set(Int32).new
+old_frequencies = Set{0}
 continue = true
 
 while continue == true
