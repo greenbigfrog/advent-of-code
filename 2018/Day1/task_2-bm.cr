@@ -7,36 +7,15 @@ def find_frequency
   old_frequencies = Set{0}
   continue = true
 
-  while continue == true
-    INPUT.each do |x|
-      a += x
-      if old_frequencies.includes?(a)
-        continue = false
-        break
-      end
-      old_frequencies << a
+  INPUT.cycle.each do |x|
+    a += x
+    if old_frequencies.includes?(a)
+      break
     end
-  end
-end
-
-def find_frequency_old
-  a = 0
-  old_frequencies = Set(Int32).new
-  continue = true
-
-  while continue == true
-    INPUT.each do |x|
-      a += x
-      if old_frequencies.includes?(a)
-        continue = false
-        break
-      end
-      old_frequencies << a
-    end
+    old_frequencies << a
   end
 end
 
 Benchmark.ips do |x|
-  x.report("pre-populate with 0") { find_frequency }
-  x.report("don't") { find_frequency_old }
+  x.report("Find first common frequency") { find_frequency }
 end

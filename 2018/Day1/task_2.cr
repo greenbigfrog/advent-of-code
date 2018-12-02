@@ -7,14 +7,11 @@ a = 0
 old_frequencies = Set{0}
 continue = true
 
-while continue == true
-  input.each do |x|
-    a += x
-    if old_frequencies.includes?(a)
-      puts "The result is #{a}. (Took #{(Time.now - START).total_milliseconds} ms)"
-      continue = false
-      break
-    end
-    old_frequencies << a
+input.cycle.each do |x|
+  a += x
+  if old_frequencies.includes?(a)
+    puts "The result is #{a}. (Took #{(Time.now - START).total_milliseconds} ms)"
+    break
   end
+  old_frequencies << a
 end
