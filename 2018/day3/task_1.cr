@@ -9,6 +9,10 @@ class Vector
   def initialize(@x, @y)
   end
 
+  def ==(other)
+    @x == other.x && @y == other.y
+  end
+
   def_hash(@x, @y)
 end
 
