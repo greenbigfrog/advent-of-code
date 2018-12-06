@@ -22,25 +22,28 @@ def task_1(data : String | Array(Char))
     end
     i += 1
   end
-  array.size
+  array
 end
 
 def task_2(string : String)
   chars = ('a'..'z').to_a
   chars.min_of do |x|
     test = string.gsub(/#{x}/i, "")
-    task_1(test) - 2
+    task_1(test).size
   end
 end
 
-a = Time.measure do
-  b = input[0]
-  pp task_1(b)
-  pp task_2(b)
-end
-pp a.total_milliseconds
-
-# Benchmark.ips do |x|
-#   x.report("part_1") { task_1(input[0]) }
-#   x.report("part_2") { task_2(input[0]) }
+# a = Time.measure do
+#   b = input[0]
+#   c = task_1(b)
+#   pp c.size
+#   pp task_2(c.join(""))
 # end
+# pp a.total_milliseconds
+
+b = input[0]
+c = task_1(b)
+Benchmark.ips do |x|
+  x.report("part_1") { task_1(b) }
+  x.report("part_2") { task_2(c.join("")) }
+end
