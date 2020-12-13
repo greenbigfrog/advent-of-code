@@ -49,8 +49,9 @@ end
 
 puts "Part 1: #{max}"
 
-ids.sort!.each_with_index do |x, i|
+ids.sort!
+ids.each_with_index do |x, i|
   if ids[i-1] == x-2
-    puts "Part 2: #{x}"
+    puts "Part 2: #{x - 1}"
   end
 end
