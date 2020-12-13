@@ -59,6 +59,7 @@ i.each do |s|
   data.each do |d|
     next if s.match(d)
     count = false
+    break
   end
   counter += 1 if count
 end
@@ -71,6 +72,7 @@ i.each do |s|
   data_ver.each do |d|
     next if s.match(d)
     count = false
+    break
   end
   counter_ver += 1 if count
 end
