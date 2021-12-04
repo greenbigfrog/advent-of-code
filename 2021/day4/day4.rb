@@ -40,7 +40,7 @@ def mark(boards, number)
 end
 
 def check_row(columns)
-    [0..4].each do |i|
+    (0..4).each do |i|
         return true if columns.all? { |x| x[i].nil? }
     end
     false
