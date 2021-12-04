@@ -1,5 +1,5 @@
 
-file = "example.txt"
+file = "input.txt"
 input = File.readlines(file)
 
 numbers = input.first.split(",")
@@ -55,15 +55,13 @@ def check(boards)
         if c || r
             puts "#{b} has empty row or column"
             return sum(b)
-        else
-            return false
         end
     end
+    false
 end
 
 numbers.each do |number|
     boards = mark(boards, number)
-    puts boards.inspect
     c = check(boards)
     if c
         puts "sum is #{c}, last number was #{number}"
