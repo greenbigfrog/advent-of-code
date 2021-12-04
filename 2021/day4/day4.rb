@@ -47,25 +47,29 @@ def check_row(columns)
 end
 
 def check(boards)
-    boards.each do |b|
+    s = nil
+    x = boards.map do |b|
         r = check_row(b)
         puts "Empty row" if r
         c = b.any? { |x| x.compact.empty? }
         puts "Empty column" if c
         if c || r
             puts "#{b} has empty row or column"
-            return sum(b)
+            s = sum(b) unless s
+            nil
+        else
+            b
         end
     end
-    false
+    return x.compact, s
 end
 
 numbers.each do |number|
     boards = mark(boards, number)
-    c = check(boards)
-    if c
-        puts "sum is #{c}, last number was #{number}"
-        puts c * number.to_i
-        exit
+    x, sum = check(boards)
+    if sum
+        # first score is result for part 1, last for part 2
+        puts "sum is #{sum}, last number was #{number} score: #{sum * number.to_i}"
     end
+    boards = x
 end
