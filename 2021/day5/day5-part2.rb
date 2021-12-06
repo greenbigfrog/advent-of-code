@@ -1,3 +1,5 @@
+# require "drawille"
+
 class MyRange
     def initialize(first, last)
         @first, @last = first, last
@@ -16,7 +18,7 @@ class MyRange
     end
 
     def size
-        [@first - @last, @last - @first].max
+        [@first - @last, @last - @first].max + 1
     end
 
     def to_a
@@ -76,8 +78,12 @@ lines.each do |line|
     end
 end
 
-# map.each do |x|
-#     puts x.inspect
+# canvas = Drawille::Canvas.new
+# map.each_with_index do |row, x|
+#     row.each_with_index do |val, y|
+#         canvas.set(x, y) if val > 0 && y < 500 && x < 500
+#     end
 # end
+# puts canvas.frame
 
 puts map.map { |x| x.count { |y| y > 1 }}.sum
