@@ -26,8 +26,12 @@ MAP = {
 
 # Removes given letter from all arrays in the values of dict
 def remove_letter(dict, letter)
+  puts "removing #{letter}"
   dict.transform_values do |value|
-    value.map! { |x| x.delete(letter); x }
+    value.map! { |x|
+      x.delete(letter)
+      x
+    }
     value.reject!(&:empty?)
     value.uniq! # TODO: Why do we need this?
 
@@ -39,10 +43,11 @@ def remove_letter(dict, letter)
 end
 
 def get_dict(text)
+  # 1. Split text into numbers, add groups of possible translations for letter to dictionary
   dictionary = Hash.new { [] }
-  text.split(' ').each do |num|
-    next unless num.length == 2 || num.length == 3 || num.length == 4 || num.length == 7
-
+  split = text.split(' ')
+  split.delete('|')
+  split.each do |num|
     match = nil
     MAP.each do |m, _|
       if m.size == num.length
@@ -59,58 +64,65 @@ def get_dict(text)
   dict = {}
   did_nothing = false
 
-  backup = dictionary.transform_values { |v| v.dup }.dup
+  backup = dictionary.transform_values(&:dup).dup
 
+  # 2. Delete keys from dictionary until empty. Move translations to dict
   until dictionary.any? { |_, v| v.empty? } || dictionary.empty?
-    # puts "dictionary: #{dictionary}"
-    # puts "dict: #{dict}"
-
+    puts "dictionary: #{dictionary}"
+    puts "dict: #{dict}"
     letter = nil
 
     begin
       res = nil
       dictionary.each do |mapping, possible_groups|
         res = mapping
-        if possible_groups.size == 1
-          letter = possible_groups.first.first
-          dict[mapping] = letter
-          break
-        end
 
+        # If only 1 letter left as possiblity
         possible_groups.each do |g|
-          if g.size == 1 && dict[mapping].nil?
+          if g.size == 1
             letter = g.first
             dict[mapping] = letter
             break
-          elsif g.size == 2 && dict[mapping].nil?
-            letter = g[Random.rand(2)]
-            dict[mapping] = letter
-            break
-          else
-            did_nothing = true
           end
         end
+        break if letter
+      end
 
-        if letter
-          did_nothing = false
-          break
+      unless letter
+        dictionary.each do |mapping, possible_groups|
+          res = mapping
+          # If only 2 letters left as possiblity
+          possible_groups.each do |g|
+            if g.size == 2
+              letter = g[Random.rand(2)]
+              dict[mapping] = letter
+              break
+            end
+          end
+
+          break if letter
         end
       end
 
-      if did_nothing
-        key, value = dictionary[Random.rand(dictionary.size)]
-        i = Random.rand(value.size)
-        raise "Did nothing. Error in selecting" if value[i].size == 1
-
-        letter = value[i][Random.rand(value[i].size)]
-        dict[key] = letter
+      # If only 3 or more letters left as possiblity
+      unless letter
+        i = Random.rand(dictionary.keys.first.size)
+        original = dictionary.keys[i]
+        res = original
+        possible_group = dictionary.values[i].first
+        letter = possible_group[Random.rand(possible_group.size)]
+        dict[original] = letter
       end
+
+      raise "No letter" unless letter
 
       dictionary = remove_letter(dictionary, letter)
       dictionary.delete(res)
     rescue StandardError => e
-      puts "Error #{e}. Retrying"
-      dictionary = backup.transform_values { |v| v.dup }.dup
+      puts "Error #{e}. Undoing"
+      # raise e unless e == NoMethodError || e == RuntimeError || e.message == 'Did nothing. Error in selecting'
+
+      dictionary = backup.transform_values(&:dup).dup
     end
   end
   dict
@@ -137,7 +149,8 @@ def call(text)
 
     res = translate(dict, number)
   rescue StandardError => e
-    puts "Error during translation: #{e}"
+    puts "Error during translation of #{number}: #{e}"
+    # raise e
     return nil
   end
   res
@@ -145,7 +158,7 @@ end
 
 sum = 0
 input.each do |line|
-  puts "Retrying line" until (r = call(line))
+  puts "Retrying line #{line}" until (r = call(line))
   sum += r
 end
 
