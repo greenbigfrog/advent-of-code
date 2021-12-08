@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-input = File.readlines('example.txt')
+input = File.readlines('input.txt')
 
 count = 0
 input.each do |x|
@@ -26,7 +26,6 @@ MAP = {
 
 # Removes given letter from all arrays in the values of dict
 def remove_letter(dict, letter)
-  puts "removing #{letter}"
   dict.transform_values do |value|
     value.map! { |x|
       x.delete(letter)
@@ -68,8 +67,6 @@ def get_dict(text)
 
   # 2. Delete keys from dictionary until empty. Move translations to dict
   until dictionary.any? { |_, v| v.empty? } || dictionary.empty?
-    puts "dictionary: #{dictionary}"
-    puts "dict: #{dict}"
     letter = nil
 
     begin
@@ -119,8 +116,7 @@ def get_dict(text)
       dictionary = remove_letter(dictionary, letter)
       dictionary.delete(res)
     rescue StandardError => e
-      puts "Error #{e}. Undoing"
-      # raise e unless e == NoMethodError || e == RuntimeError || e.message == 'Did nothing. Error in selecting'
+      # puts "Error #{e}. Undoing"
 
       dictionary = backup.transform_values(&:dup).dup
     end
@@ -132,9 +128,7 @@ def translate(dict, number)
   result = 0
   number.rstrip.split(' ').each_with_index do |num, i|
     converted = num.split('').map { |x| dict[x] }.sort.to_a
-    puts "Converted: #{converted.inspect}"
     res = MAP[converted]
-    puts "Res: #{res}"
     result += res * (10**(3 - i))
   end
   result
@@ -143,14 +137,12 @@ end
 def call(text)
   begin
     dict = get_dict(text)
-    puts "dict: #{dict}"
 
     _, number = text.split(' | ')
 
     res = translate(dict, number)
   rescue StandardError => e
-    puts "Error during translation of #{number}: #{e}"
-    # raise e
+    # puts "Error during translation of #{number}: #{e}"
     return nil
   end
   res
@@ -158,7 +150,8 @@ end
 
 sum = 0
 input.each do |line|
-  puts "Retrying line #{line}" until (r = call(line))
+  # puts "Retrying line #{line}" 
+  nil until (r = call(line))
   sum += r
 end
 
