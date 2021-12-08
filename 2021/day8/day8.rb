@@ -19,7 +19,7 @@ MAP = {
   %w[b c d f] => 4,
   %w[a b d f g] => 5,
   %w[a b d e f g] => 6,
-  %w[b c f] => 7,
+  %w[a c f] => 7,
   %w[a b c d e f g] => 8,
   %w[a b c d f g] => 9
 }.freeze
