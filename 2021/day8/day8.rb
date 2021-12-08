@@ -24,71 +24,129 @@ MAP = {
   %w[a b c d f g] => 9
 }.freeze
 
-sum = 0
-input.each do |line|
-  dictionary = Hash.new() { [] }
-  line.split(' ').each do |num|
+# Removes given letter from all arrays in the values of dict
+def remove_letter(dict, letter)
+  dict.transform_values do |value|
+    value.map! { |x| x.delete(letter); x }
+    value.reject!(&:empty?)
+    value.uniq! # TODO: Why do we need this?
+
+    # If we reach a point where we deleted the last option for a given letter, we reached a point of no return
+    raise "Value is empty after removing #{letter}" if value.empty? && dict.size > 1
+
+    value
+  end
+end
+
+def get_dict(text)
+  dictionary = Hash.new { [] }
+  text.split(' ').each do |num|
     next unless num.length == 2 || num.length == 3 || num.length == 4 || num.length == 7
 
     match = nil
     MAP.each do |m, _|
       if m.size == num.length
-        match = m
+        match = m.dup
         break
       end
     end
 
     num.split('').each do |x|
-      dictionary[x] += match
+      dictionary[x] = dictionary[x] << match
     end
   end
-
-  puts dictionary
 
   dict = {}
-  while !dictionary.empty?
-    original = nil
-    res = nil
-    max = 0
-    dictionary.each do |orig, possible|
-      if possible.size == 1
-        original = orig
-        res = possible.first
-        break
+  did_nothing = false
+
+  backup = dictionary.transform_values { |v| v.dup }.dup
+
+  until dictionary.any? { |_, v| v.empty? } || dictionary.empty?
+    # puts "dictionary: #{dictionary}"
+    # puts "dict: #{dict}"
+
+    letter = nil
+
+    begin
+      res = nil
+      dictionary.each do |mapping, possible_groups|
+        res = mapping
+        if possible_groups.size == 1
+          letter = possible_groups.first.first
+          dict[mapping] = letter
+          break
+        end
+
+        possible_groups.each do |g|
+          if g.size == 1 && dict[mapping].nil?
+            letter = g.first
+            dict[mapping] = letter
+            break
+          elsif g.size == 2 && dict[mapping].nil?
+            letter = g[Random.rand(2)]
+            dict[mapping] = letter
+            break
+          else
+            did_nothing = true
+          end
+        end
+
+        if letter
+          did_nothing = false
+          break
+        end
       end
 
-      possible.each do |x|
-        c = possible.count(x)
-        next unless c > max
+      if did_nothing
+        key, value = dictionary[Random.rand(dictionary.size)]
+        i = Random.rand(value.size)
+        raise "Did nothing. Error in selecting" if value[i].size == 1
 
-        res = x
-        max = c
-        original = orig
+        letter = value[i][Random.rand(value[i].size)]
+        dict[key] = letter
       end
+
+      dictionary = remove_letter(dictionary, letter)
+      dictionary.delete(res)
+    rescue StandardError => e
+      puts "Error #{e}. Retrying"
+      dictionary = backup.transform_values { |v| v.dup }.dup
     end
-
-    dictionary = dictionary.map do |key, possible|
-      possible.delete(res)
-      [key, possible]
-    end.to_h
-
-    dict[original] = res
-    dictionary.delete(original)
   end
+  dict
+end
 
-  puts "dict: #{dict}"
-
-  _, number = line.split(' | ')
-
+def translate(dict, number)
   result = 0
   number.rstrip.split(' ').each_with_index do |num, i|
-    converted = num.split('').map { |x| dict[x] }.sort
-    puts "Converted: #{converted}"
+    converted = num.split('').map { |x| dict[x] }.sort.to_a
+    puts "Converted: #{converted.inspect}"
     res = MAP[converted]
-    result += res.to_i * (10**(3 - i))
+    puts "Res: #{res}"
+    result += res * (10**(3 - i))
   end
-  puts result
-  sum += result
+  result
+end
+
+def call(text)
+  begin
+    dict = get_dict(text)
+    puts "dict: #{dict}"
+
+    _, number = text.split(' | ')
+
+    res = translate(dict, number)
+  rescue StandardError => e
+    puts "Error during translation: #{e}"
+    return nil
+  end
+  res
+end
+
+sum = 0
+input.each do |line|
+  puts "Retrying line" until (r = call(line))
+  sum += r
 end
 
 puts sum
